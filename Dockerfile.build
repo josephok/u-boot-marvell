@@ -1,0 +1,16 @@
+FROM docker.m.daocloud.io/library/ubuntu:14.04
+
+RUN sed -i 's|http://archive.ubuntu.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list && \
+    sed -i 's|http://security.ubuntu.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list && \
+    apt-get update && apt-get install -y \
+    gcc-arm-linux-gnueabihf \
+    make \
+    perl \
+    bc \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV CROSS_COMPILE=arm-linux-gnueabihf-
+ENV CROSS_COMPILE_BH=arm-linux-gnueabihf-
+
+WORKDIR /build

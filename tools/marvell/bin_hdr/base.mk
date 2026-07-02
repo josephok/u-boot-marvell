@@ -64,7 +64,7 @@
 
 sinclude $(TOPDIR)/include/autoconf.mk
 
-CFLAGS =
+CFLAGS = -fno-stack-protector
 
 # LIBNAME and SILNAME may be overriden in SoC cases bellow
 BOARDNAME = $(BOARD)

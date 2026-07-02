@@ -273,7 +273,7 @@ extern unsigned int mvUartPortGet(void);
 #define CONFIG_ENV_SECT_SIZE_SPI	0x40000
 #endif
 
-#define	CONFIG_ENV_OFFSET_SPI		0x100000
+#define	CONFIG_ENV_OFFSET_SPI		0xf0000
 #define	CONFIG_ENV_SIZE_SPI		CONFIG_ENV_SECT_SIZE_SPI
 
 
