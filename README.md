@@ -8,16 +8,16 @@
 ## Install
 1. Use kwboot to load compiled U-Boot binary to DDR and test it:
 ```bash
-kwboot -b u-boot-a375-xx-spi.bin -t -B 115200 /dev/ttyUSB0
+kwboot -b u-boot-wd.bin -t -B 115200 /dev/ttyUSB0
 ```
 
 2. Load compiled U-Boot binary to DDR:
 ```bash
-usb start; fatload usb 0:1 0x2000000 u-boot-a375-xx-spi.bin
+usb start; fatload usb 0:1 0x2000000 u-boot-wd.bin
 ```
 or use tftp:
 ```bash
-tftpboot 0x2000000 u-boot-a375-xx-spi.bin
+tftpboot 0x2000000 u-boot-wd.bin
 ```
 
 3. Write it to SPI flash:
@@ -53,7 +53,7 @@ tftpboot 0x2000000 u-boot-a375-xx-spi.bin
 |---------|-------------|
 | `sf probe/read/write/erase` | SPI Flash operations |
 | `nand read/write/erase` | NAND Flash operations |
-| `scsi scan/info/read` | SATA disk operations (via SCSI interface) |
+| `ide reset/info/read/write` | SATA disk operations (via Marvell IDE/SATA interface) |
 | `mmc rescan/info/read/write` | MMC/SD card operations |
 | `usb start/info/read` | USB storage operations |
 
@@ -114,8 +114,8 @@ tftpboot 0x2000000 u-boot-a375-xx-spi.bin
 
 ### Loading Linux from SATA example
 ```bash
-scsi scan
-ext4load scsi 0:1 0x2000000 /boot/uImage
+ide reset
+ext4load ide 0:1 0x2000000 /boot/uImage
 setenv bootargs 'console=ttyS0,115200 root=/dev/sda1 rw rootwait'
 bootm 0x2000000
 ```

@@ -140,7 +140,6 @@ extern unsigned int mvUartPortGet(void);
 #define CONFIG_CMD_RUN
 #define CONFIG_CMD_MISC
 #define CONFIG_CMD_IDE
-#define CONFIG_CMD_SCSI
 #define CONFIG_CMD_SAR
 #define CONFIG_CMD_STAGE_BOOT
 #define CONFIG_CMD_RCVR
@@ -454,15 +453,15 @@ extern int nand_get_env_offs(void);
 	#define CONFIG_DOS_PARTITION
 	#define CONFIG_ISO_PARTITION
 	#define ENV_USB0_MODE   "host"
-	#define ENV_USB_ACTIVE        "0"
-	#define ENV_USB_MODE          "3"	/* 3 = USB3.0 | 2 = USB2.0 */
+	#define ENV_USB_ACTIVE        "1"
+	#define ENV_USB_MODE          "2"	/* 3 = USB3.0 | 2 = USB2.0 */
 	/* Marvell encapsulate it's USB usage with usbActive internal index,
 	 * the usb stack uses 1 controller simultaneously */
 	#define CONFIG_USB_MAX_CONTROLLER_COUNT		1
 	/* xHCI code relies on index receiving from that usbActive,
 	 * which could go up to 2 for several SoCs. this requires xHCI arrays to be as big as
 	 * the actual USB host count */
-	#define CONFIG_USB_MAX_CONTROLLER_HOST_COUNT	1
+	#define CONFIG_USB_MAX_CONTROLLER_HOST_COUNT	2
 #if defined(CONFIG_USB_XHCI) || defined(CONFIG_USB_EHCI)
 	#define CONFIG_USB_XHCI_HCD /* set kernel define - for mv_hal/usb usage */
 #endif /* CONFIG_USB_XHCI */

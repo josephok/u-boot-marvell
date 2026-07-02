@@ -83,3 +83,9 @@ cscope.*
 
 # spl ais files
 /spl/*.ais
+
+# Keep original WD bin_hdr
+!orig_bin_hdr_raw.bin
+
+# Marvell monext
+examples/api/marvell/mon_ext/monext
