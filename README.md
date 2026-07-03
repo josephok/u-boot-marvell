@@ -23,8 +23,8 @@ tftpboot 0x2000000 u-boot-wd.bin
 3. Write it to SPI flash:
 ```bash
 => sf probe
-=> sf erase 0x0 0x100000
-=> sf write 0x2000000 0x0 0x100000
+=> sf erase 0x0 0xf0000
+=> sf write 0x2000000 0x0 0xf0000
 => reset
 ```
 

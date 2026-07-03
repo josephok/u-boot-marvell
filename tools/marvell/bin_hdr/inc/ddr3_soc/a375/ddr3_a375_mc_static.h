@@ -76,43 +76,39 @@ typedef struct __mvDramMcInit {
 /* DB-88F5720 (Armada375 32bit) 533MHz  */
 MV_DRAM_MC_INIT ddr3_Customer_0_533[MV_MAX_DDR3_STATIC_SIZE] =
 {
-    {0x00001400, 0x7B00C820}, 	/*DDR SDRAM Configuration Register*/
+    {0x00001400, 0x7B005040}, 	/*DDR SDRAM Configuration Register*/
     {0x00001404, 0x36301820}, 	/*Dunit Control Low Register */
-    {0x00001408, 0x33137772}, 	/*DDR SDRAM Timing (Low) Register */
-    {0x0000140C, 0x384019D5}, 	/*DDR SDRAM Timing (High) Register */
-    {0x00001410, 0x10000000}, 	/*DDR SDRAM Open Pages Control Register */
+    {0x00001408, 0x35137663}, 	/*DDR SDRAM Timing (Low) Register */
+    {0x0000140C, 0x3809229F}, 	/*DDR SDRAM Timing (High) Register */
+    {0x00001410, 0x1B100001}, 	/*DDR SDRAM Open Pages Control Register */
     {0x00001414, 0x00000700}, 	/*DDR SDRAM Open Pages Control Register */
 
     {0x00001424, 0x0060F3FF}, 	/*Dunit Control High Register */
     {0x00001428, 0x000D6720}, 	/*DDR ODT Timing (Low) Register */
     {0x0000142C, 0x028C50C3}, 	/*DDR3 Timing Register */
     {0x0000147C, 0x0000B571},  /*DDR ODT Timing (High) Register */
-    {0x00001494, 0x00030000},  /*SDRAM_SRAM_ODT_CNTL_LOW */
-    {0x0000149C, 0x00000303},  /*SDRAM_ODT_CONTROL */
+    {0x00001494, 0x00330000},  /*SDRAM_SRAM_ODT_CNTL_LOW */
+    {0x0000149C, 0x00000001},  /*SDRAM_ODT_CONTROL */
 
     {0x000014a8, 0x00000000}, 	/*AXI Control Register */
-    {0x00001504, 0x7FFFFFE1}, 	/* CS0 Size */
-    {0x0000150C, 0x7FFFFFE5}, 	/* CS1 Size */
-    {0x00001514, 0x00000000}, 	/* CS2 Size */
-    {0x0000151C, 0x00000000}, 	/* CS3 Size */
-    {0x00001538, 0x00000707}, 	/*Read Data Sample Delays Register */
-    {0x0000153C, 0x00000707}, 	/*Read Data Ready Delay Register */
+    {0x00001504, 0x3FFFFFF1}, 	/* CS0 Size */
+    {0x0000150C, 0x7FFFFFF0}, 	/* CS1 Size (disabled) */
+    {0x00001514, 0x00FFFFF0}, 	/* CS2 Size */
+    {0x0000151C, 0x00FFFFF0}, 	/* CS3 Size */
+    {0x00001538, 0x00000007}, 	/*Read Data Sample Delays Register */
+    {0x0000153C, 0x0000000B}, 	/*Read Data Ready Delay Register */
 
     {0x000015D0, 0x00000630}, 	/*MR0 */
-    {0x000015D4, 0x00000046}, 	/*MR1 */
-    {0x000015D8, 0x00000008}, 	/*MR2 */
+    {0x000015D4, 0x00000044}, 	/*MR1 */
+    {0x000015D8, 0x00000408}, 	/*MR2 */
     {0x000015DC, 0x00000000}, 	/*MR3 */
 
-    {0x000015E0, 0x00000023}, 	/*DDR3 Rank Control Register */
-    {0x000015E4, 0x00203c18}, 	/*ZQC Configuration Register */
-#ifdef CONFIG_ALP_A375_ZX_REV
-    {0x000015EC, 0xF8000f25}, 	/*DDR PHY */
-#else
-	{0x000015EC, 0xF8000025}, 	/*DDR PHY */
-#endif
+    {0x000015E0, 0x00000001}, 	/*DDR3 Rank Control Register */
+    {0x000015E4, 0x00203C18}, 	/*ZQC Configuration Register */
+    {0x000015EC, 0xD8000025}, 	/*DDR PHY */
 
-    {0x000014C0, 0x192434E9}, 	/*DRAM address and Control Driving Strenght */
-    {0x000014C4, 0x192434E9}, 	/*DRAM Data and DQS Driving Strenght */
+    {0x000014C0, 0x19242DDB}, 	/*DRAM address and Control Driving Strenght */
+    {0x000014C4, 0x092424C9}, 	/*DRAM Data and DQS Driving Strenght */
     {0x0, 0x0}
 };
 #else /* CONFIG_CUSTOMER_BOARD_SUPPORT */
@@ -120,43 +116,39 @@ MV_DRAM_MC_INIT ddr3_Customer_0_533[MV_MAX_DDR3_STATIC_SIZE] =
 /* DB-88F5720 (Armada375 32bit) 533MHz  */
 MV_DRAM_MC_INIT ddr3_A375_DB_6720_533[MV_MAX_DDR3_STATIC_SIZE] =
 {
-    {0x00001400, 0x7B00C820}, 	/*DDR SDRAM Configuration Register*/
+    {0x00001400, 0x7B005040}, 	/*DDR SDRAM Configuration Register*/
     {0x00001404, 0x36301820}, 	/*Dunit Control Low Register */
-    {0x00001408, 0x33137772}, 	/*DDR SDRAM Timing (Low) Register */
-    {0x0000140C, 0x384019D5}, 	/*DDR SDRAM Timing (High) Register */
-    {0x00001410, 0x10000000}, 	/*DDR SDRAM Open Pages Control Register */
+    {0x00001408, 0x35137663}, 	/*DDR SDRAM Timing (Low) Register */
+    {0x0000140C, 0x3809229F}, 	/*DDR SDRAM Timing (High) Register */
+    {0x00001410, 0x1B100001}, 	/*DDR SDRAM Open Pages Control Register */
     {0x00001414, 0x00000700}, 	/*DDR SDRAM Open Pages Control Register */
 
     {0x00001424, 0x0060F3FF}, 	/*Dunit Control High Register */
     {0x00001428, 0x000D6720}, 	/*DDR ODT Timing (Low) Register */
     {0x0000142C, 0x028C50C3}, 	/*DDR3 Timing Register */
     {0x0000147C, 0x0000B571},  /*DDR ODT Timing (High) Register */
-    {0x00001494, 0x00030000},  /*SDRAM_SRAM_ODT_CNTL_LOW */
-    {0x0000149C, 0x00000303},  /*SDRAM_ODT_CONTROL */
+    {0x00001494, 0x00330000},  /*SDRAM_SRAM_ODT_CNTL_LOW */
+    {0x0000149C, 0x00000001},  /*SDRAM_ODT_CONTROL */
 
     {0x000014a8, 0x00000000}, 	/*AXI Control Register */
-    {0x00001504, 0x7FFFFFE1}, 	/* CS0 Size */
-    {0x0000150C, 0x7FFFFFE5}, 	/* CS1 Size */
-    {0x00001514, 0x00000000}, 	/* CS2 Size */
-    {0x0000151C, 0x00000000}, 	/* CS3 Size */
-    {0x00001538, 0x00000707}, 	/*Read Data Sample Delays Register */
-    {0x0000153C, 0x00000707}, 	/*Read Data Ready Delay Register */
+    {0x00001504, 0x3FFFFFF1}, 	/* CS0 Size */
+    {0x0000150C, 0x7FFFFFF0}, 	/* CS1 Size (disabled) */
+    {0x00001514, 0x00FFFFF0}, 	/* CS2 Size */
+    {0x0000151C, 0x00FFFFF0}, 	/* CS3 Size */
+    {0x00001538, 0x00000007}, 	/*Read Data Sample Delays Register */
+    {0x0000153C, 0x0000000B}, 	/*Read Data Ready Delay Register */
 
     {0x000015D0, 0x00000630}, 	/*MR0 */
-    {0x000015D4, 0x00000046}, 	/*MR1 */
-    {0x000015D8, 0x00000008}, 	/*MR2 */
+    {0x000015D4, 0x00000044}, 	/*MR1 */
+    {0x000015D8, 0x00000408}, 	/*MR2 */
     {0x000015DC, 0x00000000}, 	/*MR3 */
 
-    {0x000015E0, 0x00000023}, 	/*DDR3 Rank Control Register */
-    {0x000015E4, 0x00203c18}, 	/*ZQC Configuration Register */
-#ifdef CONFIG_ALP_A375_ZX_REV
-    {0x000015EC, 0xF8000f25}, 	/*DDR PHY */
-#else
-	{0x000015EC, 0xF8000025}, 	/*DDR PHY */
-#endif
+    {0x000015E0, 0x00000001}, 	/*DDR3 Rank Control Register */
+    {0x000015E4, 0x00203C18}, 	/*ZQC Configuration Register */
+	{0x000015EC, 0xD8000025}, 	/*DDR PHY */
 
-    {0x000014C0, 0x192434E9}, 	/*DRAM address and Control Driving Strenght */
-    {0x000014C4, 0x192434E9}, 	/*DRAM Data and DQS Driving Strenght */
+    {0x000014C0, 0x19242DDB}, 	/*DRAM address and Control Driving Strenght */
+    {0x000014C4, 0x092424C9}, 	/*DRAM Data and DQS Driving Strenght */
     {0x0, 0x0}
 };
 
