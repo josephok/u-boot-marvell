@@ -543,7 +543,7 @@ static int mvEgigaRx(struct eth_device *dev)
 	int num_recieved_packets, pool_id;
 	MV_U32 status;
 	MV_PP2_PHYS_RXQ_CTRL *pRxq;
-	PP2_RX_DESC *pDesc;
+	PP2_RX_DESC *pDesc = NULL;
 
 	if (priv->devInit != MV_TRUE || priv->devEnable != MV_TRUE)
 		return 0; /* port is not initialized or not enabled */
