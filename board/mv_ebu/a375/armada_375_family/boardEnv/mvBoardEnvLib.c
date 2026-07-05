@@ -314,6 +314,32 @@ MV_BOOL mvBoardIsPortInSgmii(MV_U32 ethPortNum)
 }
 
 /*******************************************************************************
+* mvBoardIsPortInRgmii
+*
+* DESCRIPTION:
+*       Returns MV_TRUE if the given port is connected via external RGMII.
+*       Internal GE PHY connections (GE_PHY_P0/P3) are NOT RGMII.
+*
+* INPUT:
+*       ethPortNum - Ethernet port number.
+*
+* RETURN:
+*       MV_TRUE - port is RGMII.
+*       MV_FALSE - other (internal GE PHY, SGMII, etc.).
+*
+*******************************************************************************/
+MV_BOOL mvBoardIsPortInRgmii(MV_U32 ethPortNum)
+{
+	MV_U32 c = mvBoardEthComplexConfigGet();
+
+	if (ethPortNum == 0)
+		return (c & MV_ETHCOMP_GE_MAC0_2_RGMII0) ? MV_TRUE : MV_FALSE;
+	if (ethPortNum == 1)
+		return (c & (MV_ETHCOMP_GE_MAC1_2_RGMII1 | MV_ETHCOMP_GE_MAC1_2_RGMII0)) ? MV_TRUE : MV_FALSE;
+	return MV_FALSE;
+}
+
+/*******************************************************************************
 * mvBoardIsPortInGmii
 *
 * DESCRIPTION:
@@ -1050,14 +1076,18 @@ MV_VOID mvBoardInfoUpdate(MV_VOID)
 
 	ethComplex = mvBoardEthComplexConfigGet();
 
-	if (mvBoardIsMac1Sgmii() == MV_TRUE) {
-		/* disable GE-PHY#3, and enable SGMII */
-		ethComplex &= ~MV_ETHCOMP_GE_MAC1_2_GE_PHY_P3;
-		ethComplex |= MV_ETHCOMP_GE_MAC1_2_PON_ETH_SERDES_SFP;
-	} else {
-		/* disable SGMII, and enable GE-PHY#3 */
-		ethComplex &= ~MV_ETHCOMP_GE_MAC1_2_PON_ETH_SERDES_SFP;
-		ethComplex |= MV_ETHCOMP_GE_MAC1_2_GE_PHY_P3;
+	/* Only configure MAC1 if the board has MAC1 in its ethcomp config */
+	if (ethComplex & (MV_ETHCOMP_GE_MAC1_2_GE_PHY_P3 | MV_ETHCOMP_GE_MAC1_2_RGMII1 |
+			  MV_ETHCOMP_GE_MAC1_2_PON_ETH_SERDES_SFP)) {
+		if (mvBoardIsMac1Sgmii() == MV_TRUE) {
+			/* disable GE-PHY#3, and enable SGMII */
+			ethComplex &= ~MV_ETHCOMP_GE_MAC1_2_GE_PHY_P3;
+			ethComplex |= MV_ETHCOMP_GE_MAC1_2_PON_ETH_SERDES_SFP;
+		} else {
+			/* disable SGMII, and enable GE-PHY#3 */
+			ethComplex &= ~MV_ETHCOMP_GE_MAC1_2_PON_ETH_SERDES_SFP;
+			ethComplex |= MV_ETHCOMP_GE_MAC1_2_GE_PHY_P3;
+		}
 	}
 
 	mvBoardEthComplexConfigSet(ethComplex);

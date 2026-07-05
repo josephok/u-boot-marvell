@@ -421,6 +421,14 @@ static void mvEthComplexMacToGbePhy(MV_U32 port, MV_U32 phy, MV_U32 phyAddr)
 	if (port == 0)
 		mvEthComplexSwPortSrcSet(6, 0x0);
 
+	/* Disconnect the switch port that maps to this PHY (PHY P0 <-> SW P0,
+	 * PHY P3 <-> SW P3).  The hardware reset default leaves these switch
+	 * ports sourced from their corresponding GbE PHY, so without this
+	 * the switch still drives PHY copper TX (corrupting frames) and
+	 * consumes PHY copper RX (starving the GMAC). */
+	if (phy == 0 || phy == 3)
+		mvEthComplexSwPortSrcSet(phy, 0x0);
+
 	mvEthComplexPortDpClkSrcSet(port, 0x1);
 	mvEthComplexGbePhyPdConfigEdetASet(phy, 0x0);
 	mvEthComplexGbePhyPsEnaXcSSet(phy, 0x3);

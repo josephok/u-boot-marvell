@@ -119,10 +119,12 @@ static int mv_eth_bm_init(MV_VOID)
 		return -1;
 	}
 
-#ifdef CONFIG_MV_ETH_PP2_1
-	/* Disable BM priority */
+	/* Disable BM priority - use simple pool-based allocation (PP2.1 style).
+	 * mvBmInit() enables BM priority, but with priority enabled the BM HW
+	 * enforces per-qset buffer limits that start at 0, so no buffers would
+	 * ever be allocated for received frames.  Linux (MVPP21) always disables
+	 * BM priority. */
 	mvPp2WrReg(MV_BM_PRIO_CTRL_REG, 0);
-#endif
 
 	mvBmPoolControl(EGIGA_BM_POOL, MV_START);
 	mvPp2BmPoolBufSizeSet(EGIGA_BM_POOL, RX_BUFFER_SIZE);
@@ -300,7 +302,7 @@ static int mvEgigaInit(struct eth_device *dev, bd_t *p)
 
 			mvGmacPortPowerUp(priv->port,
 				mvBoardIsPortInSgmii(priv->port),
-				MV_FALSE/*mvBoardIsPortInRgmii(priv->port)*/);
+				!mvBoardIsPortInSgmii(priv->port)/*isRgmii/INTERNAL_CLK*/);
 		}
 
 		/* init the hal -- create internal port control structure and descriptor rings, */
@@ -374,6 +376,17 @@ static int mvEgigaInit(struct eth_device *dev, bd_t *p)
 
 	mvPp2ClsHwPortDefConfig(phys_port, 0, FLOWID_DEF(phys_port), phys_queue);
 
+	/* Configure oversize RXQ and disable SW-forwarding mode so the
+	 * classifier (not SWFWD_P2HQ) determines the destination RXQ.
+	 * Linux does this in mvpp2_cls_oversize_rxq_set(); without it the
+	 * PP2 silently discards all received frames. */
+	mvPp2ClsHwOversizeRxqLowSet(phys_port,
+		phys_queue & MV_PP2_CLS_OVERSIZE_RXQ_LOW_MASK);
+	mvPp2WrReg(MV_PP2_CLS_SWFWD_P2HQ_REG(phys_port),
+		phys_queue >> MV_PP2_CLS_OVERSIZE_RXQ_LOW_BITS);
+	/* from=0: use classifier path (clears SWFWD_PCTRL bit for this port) */
+	mvPp2ClsHwRxQueueHighSet(phys_port, 0, 0);
+
 	if (mvPrsMacDaAccept(phys_port, mac_bcast, 1 /*add*/)) {
 		printf("%s: mvPrsMacDaAccept failed\n", dev->name);
 		return -1;
@@ -386,6 +399,8 @@ static int mvEgigaInit(struct eth_device *dev, bd_t *p)
 		printf("%s: mvPp2PrsDefFlow failed\n", dev->name);
 		return -1;
 	}
+	/* Enable promiscuous mode to accept all frames regardless of MAC DA */
+	mvPrsMacPromiscousSet(phys_port, 1);
 
 	/* start the hal - rx/tx activity */
 	/* Check if link is up for 2 Sec */
@@ -465,20 +480,29 @@ static int mvEgigaTx(struct eth_device *dev, volatile void *buf, int len)
 	pDesc->bufCookie = (MV_U32)buf;
 	pDesc->physTxq = MV_PPV2_TXQ_PHYS(priv->port, EGIGA_DEF_TXP, EGIGA_DEF_TXQ);
 
-	mvOsCacheFlush(NULL, (void *)buf, len);
+	/* Flush packet buffer to DRAM so PP2 DMA reads correct data */
+	flush_dcache_range((unsigned long)buf, (unsigned long)buf + len);
 #if defined(MV_CPU_BE)
 	mvNetaTxqDescSwap(pDesc);//TODO
 #endif /* MV_CPU_BE */
-	mvOsCacheLineFlush(NULL, (void *)pDesc);
+	/* Flush TX descriptor to DRAM so PP2 DMA reads correct descriptor fields */
+	flush_dcache_range((unsigned long)pDesc, (unsigned long)pDesc + sizeof(*pDesc));
+
+	/* Drain any stale TXQ_SENT count from a previous TX; PP2 requires the
+	 * sent-descriptor count to be acknowledged before new descriptors are
+	 * reclaimed by the hardware. */
+	mvPp2TxqSentDescProc(priv->port, EGIGA_DEF_TXP, EGIGA_DEF_TXQ);
 
 	/* send */
 	mvPp2AggrTxqPendDescAdd(1);
 
-	/* Enable TXQ drain */
+	/* Enable TXQ drain so the SWF engine can move descriptors from the
+	 * aggregated TXQ to the physical TXQ, and from there to the GMAC TX
+	 * FIFO.  Must remain enabled for the full duration of the TX wait loops;
+	 * disabling it prematurely stalls the physical TXQ. */
 	mvPp2TxqDrainSet(priv->port, EGIGA_DEF_TXP, EGIGA_DEF_TXQ, MV_TRUE);
 
-	/* Tx done processing */
-	/* wait for agrregated to physical TXQ transfer */
+	/* Wait for the aggregated TXQ descriptor to be moved to the physical TXQ. */
 	txDone = mvPp2AggrTxqPendDescNumGet(0);
 	while (txDone) {
 		if (timeout++ > 10000) {
@@ -488,20 +512,19 @@ static int mvEgigaTx(struct eth_device *dev, volatile void *buf, int len)
 		txDone = mvPp2AggrTxqPendDescNumGet(0);
 	}
 
-	/* Disable TXQ drain */
-	mvPp2TxqDrainSet(priv->port, EGIGA_DEF_TXP, EGIGA_DEF_TXQ, MV_FALSE);
-
 	timeout = 0;
 	txDone = mvPp2TxqSentDescProc(priv->port, EGIGA_DEF_TXP, EGIGA_DEF_TXQ);
-	/* wait for packet to be transmitted */
-	while (!txDone) { 
+	/* Wait for the packet to be transferred from the physical TXQ to GMAC. */
+	while (!txDone) {
 		if (timeout++ > 10000) {
 			printf("timeout: packet not sent\n");
 			goto error;
 		}
 		txDone = mvPp2TxqSentDescProc(priv->port, EGIGA_DEF_TXP, EGIGA_DEF_TXQ);
 	}
-	/* txDone has increased - hw sent packet */
+
+	/* Disable TXQ drain now that the packet has been handed to the GMAC. */
+	mvPp2TxqDrainSet(priv->port, EGIGA_DEF_TXP, EGIGA_DEF_TXQ, MV_FALSE);
 
 	return 0;
 
@@ -531,8 +554,8 @@ static int mvEgigaRx(struct eth_device *dev)
 
 	while (num_recieved_packets--) {
 		pDesc = mvPp2RxqNextDescGet(pRxq);
-		/* cache invalidate - descriptor */
-		mvOsCacheLineInv(NULL, pDesc);
+		/* cache invalidate - descriptor, so CPU sees PP2-filled descriptor fields */
+		invalidate_dcache_range((unsigned long)pDesc, (unsigned long)pDesc + sizeof(*pDesc));
 #if defined(MV_CPU_BE)
 		mvNetaRxqDescSwap(pDesc);//TODO
 #endif /* MV_CPU_BE */
@@ -543,13 +566,14 @@ static int mvEgigaRx(struct eth_device *dev)
 #if defined(MV_CPU_BE)
 			mvNetaRxqDescSwap(pDesc);//TODO
 #endif /* MV_CPU_BE */
-			mvOsCacheLineFlushInv(NULL, pDesc);
+			invalidate_dcache_range((unsigned long)pDesc, (unsigned long)pDesc + sizeof(*pDesc));
 			continue;
 		}
 		/* TODO: drop fragmented packets */
 
-		/* cache invalidate - packet */
-		mvOsCacheInvalidate(NULL, (void *)pDesc->bufPhysAddr, RX_BUFFER_SIZE);
+		/* cache invalidate - packet, so CPU reads received data from DRAM */
+		invalidate_dcache_range((unsigned long)pDesc->bufPhysAddr,
+					(unsigned long)pDesc->bufPhysAddr + RX_BUFFER_SIZE);
 
 		/* give packet to stack - skip on first 2 bytes + buffer header */
 		pkt = ((MV_U8 *)pDesc->bufPhysAddr) + 2 + BUFF_HDR_OFFS;
@@ -559,15 +583,13 @@ static int mvEgigaRx(struct eth_device *dev)
 		pool_id = (status & PP2_RX_BM_POOL_ALL_MASK) >> PP2_RX_BM_POOL_ID_OFFS;
 		mvBmPoolPut(pool_id, (MV_ULONG) pDesc->bufPhysAddr, (MV_ULONG) pDesc->bufCookie);
 
-		/* cache invalidate - packet */
 #if defined(MV_CPU_BE)
 		mvNetaRxqDescSwap(pDesc);//TODO
 #endif /* MV_CPU_BE */
-		mvOsCacheInvalidate(NULL, (void *)pDesc->bufPhysAddr, RX_BUFFER_SIZE);
-
 	}
-	/* cache invalidate - descriptor */
-	mvOsCacheLineInv(NULL, pDesc);
+	/* cache invalidate - last descriptor (valid when packets_done > 0) */
+	if (packets_done > 0)
+		invalidate_dcache_range((unsigned long)pDesc, (unsigned long)pDesc + sizeof(*pDesc));
 
 	mvPp2RxqDescNumUpdate(priv->port, EGIGA_DEF_RXQ, packets_done, packets_done);
 

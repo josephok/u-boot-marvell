@@ -662,8 +662,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_PP2_TXQ_WRR_BYTE_COUNT_MASK		(0x3FFFF << MV_PP2_TXQ_WRR_BYTE_COUNT_OFFS)
 
 /************************** PPv2 HW defines ******************************/
-#define MV_PP2_RX_FIFO_PORT_DATA_SIZE		0x2000
-#define MV_PP2_RX_FIFO_PORT_ATTR_SIZE		0x80
+/* 4KB per port for MVPP21 (A375/ALP) to stay within hardware FIFO limits.
+ * Linux MVPP2 driver uses MVPP2_RX_FIFO_PORT_DATA_SIZE_4KB = 0x1000. */
+#define MV_PP2_RX_FIFO_PORT_DATA_SIZE		0x1000
+#define MV_PP2_RX_FIFO_PORT_ATTR_SIZE		0x40
 #define MV_PP2_RX_FIFO_PORT_MIN_PKT		0x80
 
 #define MV_PP2_MAX_PORTS			8 	/* Maximum number of ports supported by PPv2 HW */

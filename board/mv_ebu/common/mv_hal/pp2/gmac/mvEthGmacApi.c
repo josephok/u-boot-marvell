@@ -193,8 +193,10 @@ void mvGmacDefaultsSet(int port)
 	/* Update TX FIFO MIN Threshold */
 	regVal = MV_REG_READ(GMAC_PORT_FIFO_CFG_1_REG(port));
 	regVal &= ~GMAC_TX_FIFO_MIN_TH_ALL_MASK;
-	/* Minimal TX threshold must be less than minimal packet length */
-	regVal |= GMAC_TX_FIFO_MIN_TH_MASK(64 - 4 - 2);
+	/* Set threshold to 1 byte so GMAC starts transmitting immediately.
+	 * The original value of 58 bytes blocks frames shorter than 58 bytes
+	 * (e.g. ARP at 42 bytes), causing them to be stuck in the TX FIFO. */
+	regVal |= GMAC_TX_FIFO_MIN_TH_MASK(1);
 	MV_REG_WRITE(GMAC_PORT_FIFO_CFG_1_REG(port), regVal);
 }
 

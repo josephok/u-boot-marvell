@@ -182,8 +182,18 @@ MV_STATUS mvEthPhyInit(MV_U32 ethPortNum, MV_BOOL eeeEnable)
 		mvEth1540PhyBasicInit(ethPortNum, eeeEnable);
 		break;
 	case MV_PHY_ALP_INTERNAL_QUAD_GE:
-		if (ethphyHalData.ctrlFamily == MV_88F66X0)
+		if (ethphyHalData.ctrlFamily == MV_88F66X0) {
 			mvEthInternalQuadGEPhyBasicInit(eeeEnable);
+			mvEth1340PhyBasicInit(); /* A66X0: also needs QSGMII init */
+		}
+		/* A375 (MV_88F67X0): configure LEDs, page 3 reg 16.
+		 * Physical wiring: LED0 pin -> right (link LED), LED1 pin -> left (data LED).
+		 * LED0[3:0] = 0x0 = on when link (solid right LED).
+		 * LED1[7:4] = 0x3 = blink on activity (left data LED). */
+		mvEthPhyRegWrite(phyAddr, 22, 3);
+		mvEthPhyRegWrite(phyAddr, 16, 0x0030);
+		mvEthPhyRegWrite(phyAddr, 22, 0);
+		break;
 	case MV_PHY_88E1340S:
 	case MV_PHY_88E1340:
 		mvEth1340PhyBasicInit();

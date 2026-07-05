@@ -89,14 +89,14 @@ MV_BOARD_TWSI_INFO armada_375_customer_board_0_BoardTwsiDev[] = {
 
 MV_BOARD_MAC_INFO armada_375_customer_board_0_BoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED boardMacSpeed, MV_32 boardEthSmiAddr , MV_32 boardEthSmiAddr0;}} */
-	{ BOARD_MAC_SPEED_AUTO, 0x0, 0x0},
+	{ BOARD_MAC_SPEED_1000M, 0x0, 0x0},
 	{ BOARD_MAC_SPEED_AUTO, 0x3, 0x3},
 	{ N_A,			N_A, N_A}
 };
 MV_BOARD_MPP_TYPE_INFO armada_375_customer_board_0_BoardModTypeInfo[] = {
 	{
 		.boardMppSlic = MV_BOARD_SLIC_DISABLED,
-		.ethSataComplexOpt = (MV_ETHCOMP_GE_MAC1_2_GE_PHY_P3 | MV_ETHCOMP_GE_MAC0_2_RGMII0),
+		.ethSataComplexOpt = MV_ETHCOMP_GE_MAC0_2_GE_PHY_P0,
 		.ethPortsMode = 0x0
 	}
 };
@@ -217,14 +217,14 @@ MV_BOARD_TWSI_INFO db88f6720InfoBoardTwsiDev[] = {
 
 MV_BOARD_MAC_INFO db88f6720InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED boardMacSpeed, MV_32 boardEthSmiAddr , MV_32 boardEthSmiAddr0;}} */
-	{ BOARD_MAC_SPEED_AUTO, 0x0, 0x0 },
+	{ BOARD_MAC_SPEED_1000M, 0x0, 0x0 },
 	{ BOARD_MAC_SPEED_AUTO, 0x3, 0x3 },
 	{ N_A,			N_A, N_A },
 };
 MV_BOARD_MPP_TYPE_INFO db88f6720InfoBoardModTypeInfo[] = {
 	{
 		.boardMppSlic = MV_BOARD_SLIC_DISABLED,
-		.ethSataComplexOpt = (MV_ETHCOMP_GE_MAC1_2_GE_PHY_P3 | MV_ETHCOMP_GE_MAC0_2_RGMII0),
+		.ethSataComplexOpt = MV_ETHCOMP_GE_MAC0_2_GE_PHY_P0,
 		.ethPortsMode = 0x0
 	}
 };
