@@ -636,28 +636,29 @@ MV_VOID mvCtrlSatrInit(MV_U32 early)
 	if (early)
 		return;
 
-	/* Rest of S@R values are virtual: scanned using i2c and not from HW, SW usage only on DB boards */
+	/* Rest of S@R values are virtual: read from I2C S@R on development boards.
+	 * DDR_BUS_WIDTH and MAC1 are not sampled to any hardware register at reset;
+	 * they are stored in an I2C "shadow S@R" device present only on the DB-6720
+	 * development board.  Production boards (e.g. WD MyCloud Gen2) do not have
+	 * this I2C device, so we fall back to fixed defaults:
+	 *   DDR_BUS_WIDTH = 0 (32-bit bus, matching the board's DDR3 configuration)
+	 *   MAC1          = 0 (internal GbE PHY) */
 	if (mvBoardIdGet() == DB_6720_ID) {
-		/* Read DDR Bus width and MAC1 configuration:
-		   - DDR_BUS_WIDTH & MAC1 - only S@R fields that are not sampled at reset to any internal register
-		   - written to "shadow" register of HW I2C S@R: Need to read it separately from I2C S@R */
-		if (mvBoardSatrInfoConfig(MV_SATR_WRITE_DDR_BUS_WIDTH, &satrInfo, MV_FALSE) != MV_OK)
-			mvOsPrintf("%s: Error: DDR_BUS_WIDTH field is not relevant for this board\n", __func__);
+		if (mvBoardSatrInfoConfig(MV_SATR_WRITE_DDR_BUS_WIDTH, &satrInfo, MV_FALSE) == MV_OK) {
+			/* Default: 0 = 32-bit DDR bus width (used when I2C S@R is absent) */
+			readValue = 0;
+			mvBoardTwsiGet(BOARD_DEV_TWSI_SATR, satrInfo.regNum, 1, &readValue);
+			satrOptionsConfig[MV_SATR_DDR_BUS_WIDTH] =
+				((readValue & satrInfo.mask) >> satrInfo.offset);
+		}
 
-		/* read DDR_BUS_WIDTH from 2nd register (regNum = 1) */
-		if (mvBoardTwsiGet(BOARD_DEV_TWSI_SATR, satrInfo.regNum, 1, &readValue) != MV_OK)
-			mvOsPrintf("%s: Error: Read DDR_BUS_WIDTH from S@R failed\n", __func__);
-
-		satrOptionsConfig[MV_SATR_DDR_BUS_WIDTH] = ((readValue  & (satrInfo.mask)) >> (satrInfo.offset));
-
-		/* read MAC1 setting from 2nd register (regNum = 1) */
-		if (mvBoardTwsiGet(BOARD_DEV_TWSI_SATR, satrInfo.regNum, 1, &readValue) != MV_OK)
-			mvOsPrintf("%s: Error: Read DDR_BUS_WIDTH from S@R failed\n", __func__);
-
-		if (mvBoardSatrInfoConfig(MV_SATR_WRITE_MAC1, &satrInfo, MV_FALSE) != MV_OK)
-			mvOsPrintf("%s: Error: DDR_BUS_WIDTH field is not relevant for this board\n", __func__);
-
-		satrOptionsConfig[MV_SATR_MAC1] = ((readValue  & (satrInfo.mask)) >> (satrInfo.offset));
+		if (mvBoardSatrInfoConfig(MV_SATR_WRITE_MAC1, &satrInfo, MV_FALSE) == MV_OK) {
+			/* Default: 0 = MAC1 connected to internal GbE PHY (used when I2C S@R is absent) */
+			readValue = 0;
+			mvBoardTwsiGet(BOARD_DEV_TWSI_SATR, satrInfo.regNum, 1, &readValue);
+			satrOptionsConfig[MV_SATR_MAC1] =
+				((readValue & satrInfo.mask) >> satrInfo.offset);
+		}
 
 		satrOptionsInitialized = 2;
 	}

@@ -2504,10 +2504,8 @@ MV_STATUS mvBoardTwsiGet(MV_BOARD_TWSI_CLASS twsiClass, MV_U8 devNum, MV_U8 regN
 	twsiSlave.offset = regNum;
 	twsiSlave.moreThen256 = MV_FALSE;
 
-	if (MV_OK != mvTwsiRead(chanNum, &twsiSlave, &data, 1)) {
-		mvOsPrintf("%s: Twsi Read fail\n", __func__);
+	if (MV_OK != mvTwsiRead(chanNum, &twsiSlave, &data, 1))
 		return MV_ERROR;
-	}
 	DB(mvOsPrintf("Board: Read S@R succeded\n"));
 
 	*pData = data;
