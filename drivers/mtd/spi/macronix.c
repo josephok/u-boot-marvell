@@ -53,7 +53,9 @@ static const struct macronix_spi_flash_params macronix_spi_flash_table[] = {
 		.idcode = 0x2014,
 		.nr_blocks = 16,
 		.addr_cycles = 3,
-		.name = "MX25L8005",
+		/* MX25L8006E (JEDEC C2 20 14) — also marketed as MX25L8005;
+		 * both share the same ID and are functionally identical. */
+		.name = "MX25L8006E",
 	},
 	{
 		.idcode = 0x2015,
