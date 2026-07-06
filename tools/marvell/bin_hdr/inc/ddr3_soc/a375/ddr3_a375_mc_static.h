@@ -73,7 +73,7 @@ typedef struct __mvDramMcInit {
 } MV_DRAM_MC_INIT;
 
 #ifdef CONFIG_CUSTOMER_BOARD_SUPPORT
-/* DB-88F5720 (Armada375 32bit) 533MHz  */
+/* DB-88F6720 (Armada375 32bit) 533MHz  */
 MV_DRAM_MC_INIT ddr3_Customer_0_533[MV_MAX_DDR3_STATIC_SIZE] =
 {
     {0x00001400, 0x7B005040}, 	/*DDR SDRAM Configuration Register*/
@@ -113,7 +113,7 @@ MV_DRAM_MC_INIT ddr3_Customer_0_533[MV_MAX_DDR3_STATIC_SIZE] =
 };
 #else /* CONFIG_CUSTOMER_BOARD_SUPPORT */
 
-/* DB-88F5720 (Armada375 32bit) 533MHz  */
+/* DB-88F6720 (Armada375 32bit) 533MHz  */
 MV_DRAM_MC_INIT ddr3_A375_DB_6720_533[MV_MAX_DDR3_STATIC_SIZE] =
 {
     {0x00001400, 0x7B005040}, 	/*DDR SDRAM Configuration Register*/
