@@ -155,10 +155,7 @@ unexport CDPATH
 
 # The "tools" are needed early, so put this first
 # Don't include stuff already done in $(LIBS)
-# The "examples" conditionally depend on U-Boot (say, when USE_PRIVATE_LIBGCC
-# is "yes"), so compile examples after U-Boot is compiled.
 SUBDIR_TOOLS = tools
-SUBDIR_EXAMPLES = examples/standalone examples/api 
 SUBDIRS = $(SUBDIR_TOOLS)
 
 .PHONY : $(SUBDIRS) $(VERSION_FILE) $(TIMESTAMP_FILE)
@@ -173,7 +170,6 @@ sinclude $(obj)include/autoconf.mk.dep
 sinclude $(obj)include/autoconf.mk
 
 ifndef CONFIG_SANDBOX
-SUBDIRS += $(SUBDIR_EXAMPLES)
 endif
 
 # load ARCH, BOARD, and CPU configuration
@@ -439,7 +435,7 @@ ALL-y += $(obj)u-boot-nodtb-tegra.bin
 endif
 endif
 
-all:		$(ALL-y) $(SUBDIR_EXAMPLES)
+all:		$(ALL-y)
 
 $(obj)u-boot.dtb:	$(obj)u-boot
 		$(MAKE) -C dts binary
@@ -603,8 +599,6 @@ $(LIBBOARD):	depend $(LIBS)
 
 $(SUBDIRS):	depend
 		$(MAKE) -C $@ all
-
-$(SUBDIR_EXAMPLES): $(obj)u-boot
 
 $(LDSCRIPT):	depend
 		$(MAKE) -C $(dir $@) $(notdir $@)
