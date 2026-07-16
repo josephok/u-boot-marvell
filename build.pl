@@ -410,7 +410,9 @@ if(defined $opt_g)
 
 # Build !
 print "\n**** [Building U-BOOT]\t*****\n\n";
-$fail = system("make -j6 -s");
+my $ncpu = `nproc 2>/dev/null || echo 6`;
+chomp $ncpu;
+$fail = system("make -j$ncpu -s");
 
 if($fail){
 	print "\n *** Error: Build failed\n\n";
