@@ -116,6 +116,6 @@ tftpboot 0x2000000 u-boot-wd.bin
 ```bash
 ide reset
 ext4load ide 0:1 0x2000000 /boot/uImage
-setenv bootargs 'console=ttyS0,115200 root=/dev/sda1 rw rootwait'
+setenv bootargs 'console=ttyS0,115200 root=/dev/sda2 rw rootwait'
 bootm 0x2000000
 ```
